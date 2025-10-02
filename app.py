@@ -33,8 +33,8 @@ section = st.sidebar.radio(
 )
 
 # --- Carga fija de archivos en el ambiente ---
-DATA_PATH = "Raw data - Long.xlsx"
-PARAMS_PATH = "params_dict.json"
+DATA_PATH = "./Raw data - Long.xlsx"
+PARAMS_PATH = "./params_dict.json"
 
 # Carga archivos
 df = load_raw_data(DATA_PATH)
