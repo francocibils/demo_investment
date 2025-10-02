@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import requests
 import streamlit as st
 from utils import (
     load_params, load_raw_data, detect_columns,
@@ -38,9 +39,9 @@ PARAMS_PATH = "https://raw.githubusercontent.com/francocibils/demo_investment/ma
 
 # Carga archivos
 df = load_raw_data(DATA_PATH)
-params = load_params(PARAMS_PATH)
+#params = load_params(PARAMS_PATH)
+params = requests.get(PARAMS_PATH).json()
 
-params = load_params(PARAMS_PATH)
 if not params:
     st.error(f"No pude leer parámetros desde {PARAMS_PATH}. ¿Ruta/JSON válidos?")
     st.stop()
