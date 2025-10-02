@@ -40,6 +40,11 @@ PARAMS_PATH = "https://raw.githubusercontent.com/francocibils/demo_investment/ma
 df = load_raw_data(DATA_PATH)
 params = load_params(PARAMS_PATH)
 
+params = load_params(PARAMS_PATH)
+if not params:
+    st.error(f"No pude leer parámetros desde {PARAMS_PATH}. ¿Ruta/JSON válidos?")
+    st.stop()
+
 # Detección de columnas (ya estandarizadas)
 col_date, col_product, col_spend, col_leads = detect_columns(df)
 
