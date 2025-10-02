@@ -20,7 +20,7 @@ def load_params(path: str) -> dict:
 # Formato LONG esperado (mínimo): date | product | investment | leads
 # Formato WIDE (alternativo): "Product X - Investment", "Product X - Conversions", + fecha
 def load_raw_data(path: str) -> pd.DataFrame:
-    df = pd.read_excel(path)
+    df = pd.read_csv(path)
 
     # 1) Normalizaciones de nombres básicas
     if "Unnamed: 0" in df.columns:
