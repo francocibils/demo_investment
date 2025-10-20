@@ -31,7 +31,7 @@ def load_raw_data(path: str) -> pd.DataFrame:
     date_col  = next((cols_lower[c] for c in ["date", "fecha", "dt"] if c in cols_lower), None)
     prod_col  = next((cols_lower[c] for c in ["product", "producto", "item"] if c in cols_lower), None)
     inv_col   = next((cols_lower[c] for c in ["investment", "inversion", "spend", "gasto", "ad_spend", "inv"] if c in cols_lower), None)
-    resultados_col = next((cols_lower[c] for c in ["resultados", "conversions", "objetivo", "ventas"] if c in cols_lower), None)
+    resultados_col = next((cols_lower[c] for c in ["resultados", "conversions", "objetivo", "ventas", "results"] if c in cols_lower), None)
 
     # 2) Caso LONG ya provisto
     if prod_col and inv_col and resultados_col:
