@@ -15,11 +15,11 @@ def optimal_table_sqrt(platform_df: pd.DataFrame, budget: float) -> pd.DataFrame
     b = platform_df['b'].to_numpy(float)
     v = platform_df['v'].to_numpy(float)
     x = alloc_sqrt_model(b, v, budget)
-    leads = platform_df['a'].to_numpy(float) + b * np.sqrt(np.maximum(x, 0.0))
+    resultados = platform_df['a'].to_numpy(float) + b * np.sqrt(np.maximum(x, 0.0))
     share = x / x.sum() if x.sum() > 0 else np.zeros_like(x)
     marginal = v * (b / (2.0 * np.sqrt(np.maximum(x, 1e-12))))
     out = platform_df[['platform', 'v']].copy()
-    out['leads'] = leads
+    out['resultados'] = resultados
     out['spend'] = x
     out['share'] = share
     out['marginal_at_opt'] = marginal
