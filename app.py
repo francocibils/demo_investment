@@ -218,21 +218,21 @@ elif section == "Calculadora de resultados":
             x=alt.X("Inversión:Q", title="Inversión", axis=alt.Axis(format="$,.0f")),
             y=alt.Y("resultados:Q", title="resultados", axis=alt.Axis(format=",.0f")),
             tooltip=[alt.Tooltip("Inversión:Q", format="$,.0f"),
-                     alt.Tooltip("resultados:Q", format=",.0f")]
+                     alt.Tooltip("Resultados:Q", format=",.0f")]
         )
 
         line = alt.Chart(curve_df).mark_line(strokeWidth=3).encode(
             x=alt.X("Inversión:Q", title="Inversión"),
             y=alt.Y("resultados_modelo:Q", title="Resultados"),
             tooltip=[alt.Tooltip("Inversión:Q", format="$,.0f"),
-                    alt.Tooltip("resultados_modelo:Q", title="Resultados (modelo)", format=",.0f")]
+                    alt.Tooltip("Resultados_modelo:Q", title="Resultados (modelo)", format=",.0f")]
         )
 
         point = alt.Chart(point_df).mark_point(size=500, filled=True, shape="diamond", color="#FF4B4B").encode(
             x=alt.X("Inversión:Q"),
             y=alt.Y("resultados:Q"),
             tooltip=[alt.Tooltip("Inversión:Q", format="$,.0f"),
-                     alt.Tooltip("resultados:Q", format=",.0f")]
+                     alt.Tooltip("Resultados:Q", format=",.0f")]
         )
 
         rule_x = alt.Chart(point_df).mark_rule(strokeDash=[4,4], opacity=1, color="#FF4B4B").encode(x="Inversión:Q")
