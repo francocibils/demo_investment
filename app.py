@@ -209,7 +209,7 @@ elif section == "Calculadora de resultados":
         # KPIs arriba del gráfico
         c1, c2, c3 = st.columns(3)
         c1.metric("Inversión", f"${inversion:,.0f}")
-        c2.metric("resultados estimados", f"{resultados_est:,.0f}")
+        c2.metric("Resultados estimados", f"{resultados_est:,.0f}")
         marg = (coef / (2*np.sqrt(inversion))) if inversion > 0 else float("inf")
         c3.metric("Sensibilidad marginal", "∞" if not np.isfinite(marg) else f"{marg:,.3f}")
 
@@ -223,20 +223,20 @@ elif section == "Calculadora de resultados":
 
         line = alt.Chart(curve_df).mark_line(strokeWidth=3).encode(
             x=alt.X("Inversión:Q", title="Inversión"),
-            y=alt.Y("resultados_modelo:Q", title="resultados"),
+            y=alt.Y("Resultados_modelo:Q", title="Resultados"),
             tooltip=[alt.Tooltip("Inversión:Q", format="$,.0f"),
-                    alt.Tooltip("resultados_modelo:Q", title="resultados (modelo)", format=",.0f")]
+                    alt.Tooltip("Resultados_modelo:Q", title="Resultados (modelo)", format=",.0f")]
         )
 
         point = alt.Chart(point_df).mark_point(size=500, filled=True, shape="diamond", color="#FF4B4B").encode(
             x=alt.X("Inversión:Q"),
-            y=alt.Y("resultados:Q"),
+            y=alt.Y("Resultados:Q"),
             tooltip=[alt.Tooltip("Inversión:Q", format="$,.0f"),
-                     alt.Tooltip("resultados:Q", format=",.0f")]
+                     alt.Tooltip("Resultados:Q", format=",.0f")]
         )
 
         rule_x = alt.Chart(point_df).mark_rule(strokeDash=[4,4], opacity=1, color="#FF4B4B").encode(x="Inversión:Q")
-        rule_y = alt.Chart(point_df).mark_rule(strokeDash=[4,4], opacity=1, color="#FF4B4B").encode(y="resultados:Q")
+        rule_y = alt.Chart(point_df).mark_rule(strokeDash=[4,4], opacity=1, color="#FF4B4B").encode(y="Resultados:Q")
 
         chart = (scatter + line + point + rule_x + rule_y).properties(
             height=420,
