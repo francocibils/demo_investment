@@ -92,6 +92,8 @@ elif section == "Visualizador de datos":
     
     products_in_data = sorted(df[col_product].dropna().unique().tolist())
     products_in_params = sorted(list(params.keys()))
+    st.markdown(products_in_data)
+    st.markdown(products_in_params)
     valid_products = [p for p in products_in_data if p in products_in_params]
 
     if not valid_products:
