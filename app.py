@@ -223,9 +223,9 @@ elif section == "Calculadora de resultados":
 
         line = alt.Chart(curve_df).mark_line(strokeWidth=3).encode(
             x=alt.X("Inversión:Q", title="Inversión"),
-            y=alt.Y("resultados_modelo:Q", title="Resultados"),
+            y=alt.Y("resultados_modelo:Q", title="resultados"),
             tooltip=[alt.Tooltip("Inversión:Q", format="$,.0f"),
-                    alt.Tooltip("resultados_modelo:Q", title="Resultados (modelo)", format=",.0f")]
+                    alt.Tooltip("resultados_modelo:Q", title="resultados (modelo)", format=",.0f")]
         )
 
         point = alt.Chart(point_df).mark_point(size=500, filled=True, shape="diamond", color="#FF4B4B").encode(
@@ -551,7 +551,7 @@ elif section == "Punto rentable del próximo resultado":
     intercepto, coef = params.get(product, (np.nan, np.nan))
 
     resultado_value = st.number_input(
-        "Valor por resultado (V) — ingreso por cada resultado",
+        "Valor por resultado (V) — Ingreso por cada resultado",
         min_value=0.0, value=10.0, step=1.0, help="Usá el ingreso promedio por resultado o LTV ponderado."
     )
 
@@ -569,7 +569,7 @@ elif section == "Punto rentable del próximo resultado":
             profit   = res["profit"]
 
             c1, c2 = st.columns(2)
-            c1.metric("resultados óptimos (X*)", f"{X_star:,.1f}")
+            c1.metric("Resultados óptimos (X*)", f"{X_star:,.1f}")
             c2.metric("Inversión óptima", f"${inv_star:,.2f}")
             #c3.metric("Costo marginal en X* (dInv/dX)", f"${resultado_value:,.2f}")
 
@@ -597,7 +597,7 @@ elif section == "Punto rentable del próximo resultado":
                 point = pd.DataFrame({"resultados": [X_star], "cmg": [resultado_value]})
 
                 cmg_chart = alt.Chart(curve).mark_line().encode(
-                    x=alt.X("resultados:Q", title="resultados"),
+                    x=alt.X("resultados:Q", title="Resultados"),
                     y=alt.Y("cmg:Q", title="Costo marginal")
                 )
                 vline = alt.Chart(rule).mark_rule().encode(y="V:Q")
@@ -806,7 +806,7 @@ elif section == "Asignación óptima multi-plataforma":
     # -----------------------------
     c1, c2= st.columns(2)
     c1.metric("Presupuesto total", f"${budget:,.0f}")
-    c2.metric("resultados totales obtenidos", f"{alloc['resultados'].sum():,.0f}")
+    c2.metric("Resultados totales obtenidos", f"{alloc['resultados'].sum():,.0f}")
 
     # -----------------------------
     # Modo de visualización
