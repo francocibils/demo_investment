@@ -853,7 +853,7 @@ elif section == "Asignación óptima multi-plataforma":
     alloc["resultados_share"] = alloc["resultados"] / total_resultados if total_resultados > 0 else 0.0
     alloc["spend_share"] = alloc["spend"] / total_spend if total_spend > 0 else 0.0
 
-    st.markdown("**resultados por plataforma**")
+    st.markdown("**Resultados por plataforma**")
     cols_resultados = st.columns(len(platforms))
     for i, (name, resultados, lshare) in enumerate(zip(alloc["platform"], alloc["resultados"], alloc["resultados_share"])):
         with cols_resultados[i]:
