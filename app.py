@@ -13,7 +13,7 @@ from utils import (
 )
 import altair as alt
 
-from optimizer import build_fixed_platforms, optimal_table_sqrt
+from optimizer import build_fixed_platforms, optimal_table_sqrt, optimal_table_sqrt_bounds
 
 st.set_page_config(page_title = "Investment optimizer", page_icon="📈", layout="wide")
 
@@ -720,28 +720,7 @@ elif section == "Asignación óptima multi-plataforma":
 
     st.markdown(
     """
-    
-    **Qué hace:**  Ayuda a decidir cómo distribuir un **presupuesto total** entre distintas plataformas de medios (ejemplo: Google Ads, Instagram, TikTok, Facebook Ads, Twitter) para obtener la mejor combinación de resultados.  
-
-    **Cómo funciona:**  
-    - Ingresás cuánto vale para vos un resultado en cada plataforma.  
-    - Definís el presupuesto total disponible.  
-    - La herramienta calcula cómo conviene repartir ese presupuesto para que cada peso invertido rinda lo máximo posible según el valor de cada resultado.  
-
-    **Qué muestran los resultados:**  
-    - Una visión general con el **presupuesto total** y la **cantidad de resultados esperados**.  
-    - El detalle por plataforma, que podés ver en **cantidades absolutas** o en **porcentajes**:  
-    - **resultados** generados por cada plataforma.  
-    - **Inversión** asignada a cada una.  
-
-    **Cómo interpretar:**  
-    - Si una plataforma recibe más inversión que otra, significa que allí el sistema encuentra una mejor relación entre el valor que le diste a sus resultados y el costo de conseguirlos.  
-    - Comparar los shares de **spend** y **resultados** ayuda a ver dónde se está invirtiendo más y qué tan eficiente es esa inversión.  
-
-    **Para qué sirve:**  
-    - Planear asignaciones de presupuesto en campañas multicanal.  
-    - Probar escenarios cambiando el valor de los resultados según calidad o retorno esperado.  
-    - Visualizar cómo impacta un cambio en el presupuesto total sobre la distribución entre plataformas.  
+    **Qué hace:** Decide cómo distribuir un **presupuesto total** entre plataformas para maximizar el rendimiento, ahora **con mínimos y máximos opcionales por plataforma**.
     """
     )
 
@@ -753,7 +732,7 @@ elif section == "Asignación óptima multi-plataforma":
     products = sorted(list(params.keys()))
     product = st.selectbox("Producto", options = products, index = 0)
 
-    # Sets fijos por producto
+    # Sets fijos por producto (igual que antes)
     fixed_sets = {
         "Product 1": ["Google Ads", "Instagram", "TikTok", "Facebook Ads"],
         "Product 2": ["Google Ads", "Facebook Ads", "Twitter"],
@@ -764,7 +743,7 @@ elif section == "Asignación óptima multi-plataforma":
         st.warning("No hay plataformas configuradas para este producto.")
         st.stop()
 
-    # Inputs: valor por resultado por plataforma (editable por el usuario)
+    # Inputs: valor por resultado por plataforma
     st.subheader("Valor por resultado por plataforma")
     v_values = []
     cols = st.columns(len(platforms))
@@ -791,7 +770,7 @@ elif section == "Asignación óptima multi-plataforma":
     # Parámetros del producto (a, b)
     a_prod, b_prod = params[product]
 
-    # Construcción de plataformas y optimización (modelo raíz)
+    # Construcción de plataformas
     plat_df = build_fixed_platforms(
         product_name   = product,
         a_prod         = a_prod,
@@ -799,31 +778,81 @@ elif section == "Asignación óptima multi-plataforma":
         platform_names = platforms,
         v_values       = v_values
     )
-    alloc = optimal_table_sqrt(plat_df, budget)
+
+    # --------- NUEVO: Restricciones por plataforma (opcionales) ----------
+    st.subheader("Restricciones por plataforma")
+    st.markdown("""
+    Podés establecer mínimos y máximos de inversión para cada plataforma.
+    - Si el **presupuesto total** no alcanza para cubrir todos los mínimos, se reparte proporcionalmente entre ellos.
+    - Si los máximos son menores que el presupuesto total, se asigna hasta esos topes y el resto queda sin usar.
+    - Si una plataforma llega a su máximo, el excedente se distribuye entre las demás que aún tengan margen.
+    """)
+
+    use_bounds = st.checkbox("Activar mínimos y/o máximos por plataforma", value=False)
+
+    mins, maxs = None, None
+    if use_bounds:
+        mins, maxs = [], []
+        cols_min = st.columns(len(platforms))
+        for i, name in enumerate(platforms):
+            with cols_min[i]:
+                mn = st.number_input(
+                    f"Mín {name}",
+                    min_value=0.0,
+                    value=0.0,
+                    step=50.0,
+                    help="Dejar en 0 si no querés mínimo."
+                )
+                mins.append(mn)
+        cols_max = st.columns(len(platforms))
+        for i, name in enumerate(platforms):
+            with cols_max[i]:
+                mx = st.number_input(
+                    f"Máx {name}",
+                    min_value=0.0,
+                    value=0.0,
+                    step=50.0,
+                    help="Dejar en 0 para 'sin tope'."
+                )
+                # Interpretación: 0 => sin tope
+                maxs.append(np.inf if mx == 0 else mx)
+
+    # Optimización (con o sin límites)
+    if use_bounds:
+        alloc = optimal_table_sqrt_bounds(plat_df, budget, mins=mins, maxs=maxs)
+    else:
+        alloc = optimal_table_sqrt(plat_df, budget)
 
     # -----------------------------
-    # KPIs superiores (c1, c2, c3)
+    # KPIs superiores
     # -----------------------------
     c1, c2= st.columns(2)
     c1.metric("Presupuesto total", f"${budget:,.0f}")
     c2.metric("Resultados totales obtenidos", f"{alloc['resultados'].sum():,.0f}")
 
     # -----------------------------
-    # Modo de visualización
+    # Mensajes de esquina / ayuda
+    # -----------------------------
+    if use_bounds:
+        total_min = np.sum([m for m in mins]) if mins is not None else 0.0
+        total_max = np.sum([0 if np.isinf(x) else x for x in maxs]) if maxs is not None else np.inf
+        if total_min > budget:
+            st.warning("El presupuesto no alcanza para cumplir los **mínimos**. Se asignó proporcional a los mínimos.")
+        if total_max < budget:
+            st.info("La suma de **máximos** es menor al presupuesto: se llenaron hasta los topes y quedó remanente sin asignar.")
+
+    # -----------------------------
+    # Vista por plataforma
     # -----------------------------
     st.subheader("Vista por plataforma")
     view_mode = st.radio("Mostrar como:", ["Cantidades", "Porcentajes"], horizontal=True)
 
-    # Prepara shares
     total_resultados = float(alloc["resultados"].sum())
     total_spend = float(alloc["spend"].sum())
     alloc = alloc.copy()
     alloc["resultados_share"] = alloc["resultados"] / total_resultados if total_resultados > 0 else 0.0
     alloc["spend_share"] = alloc["spend"] / total_spend if total_spend > 0 else 0.0
 
-    # -----------------------------
-    # Métricas por plataforma: resultados
-    # -----------------------------
     st.markdown("**resultados por plataforma**")
     cols_resultados = st.columns(len(platforms))
     for i, (name, resultados, lshare) in enumerate(zip(alloc["platform"], alloc["resultados"], alloc["resultados_share"])):
@@ -833,9 +862,6 @@ elif section == "Asignación óptima multi-plataforma":
             else:
                 st.metric(label=name, value=f"{lshare:,.1%}")
 
-    # -----------------------------
-    # Métricas por plataforma: Spend
-    # -----------------------------
     st.markdown("**Spend por plataforma**")
     cols_spend = st.columns(len(platforms))
     for i, (name, spend, sshare) in enumerate(zip(alloc["platform"], alloc["spend"], alloc["spend_share"])):
